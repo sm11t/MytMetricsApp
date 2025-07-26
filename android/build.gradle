@@ -1,20 +1,27 @@
+
+
 buildscript {
     ext {
         buildToolsVersion = "34.0.0"
-        minSdkVersion = 21
+        minSdkVersion     = 21
         compileSdkVersion = 34
-        targetSdkVersion = 34
-        ndkVersion = "25.1.8937393"
-        kotlinVersion = "1.8.0"
+        targetSdkVersion  = 34
+        ndkVersion        = "25.1.8937393"
+        kotlinVersion     = "1.8.0"
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
+        // Android Gradle plugin
+        classpath("com.android.tools.build:gradle:7.4.2")
+        // React Native Gradle plugin
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        // Kotlin Gradle plugin
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        // Google Services plugin (for google-services.json)
+        classpath("com.google.gms:google-services:4.4.0")
     }
 }
 

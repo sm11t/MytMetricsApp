@@ -1,118 +1,110 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState, useEffect } from 'react';
+import { ScrollView, View, Text, Dimensions, StyleSheet, PermissionsAndroid, Platform } from 'react-native';
+import GoogleFit, { Scopes } from 'react-native-google-fit';
+import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis } from 'victory-native';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const mockHRData = [
+  { x: 'Mon', y: 72 },
+  { x: 'Tue', y: 75 },
+  { x: 'Wed', y: 70 },
+  { x: 'Thu', y: 68 },
+  { x: 'Fri', y: 74 },
+  { x: 'Sat', y: 73 },
+  { x: 'Sun', y: 71 },
+];
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+function TrackScreen() {
+  const [hrData, setHrData] = useState<{ x: string; y: number }[]>([]);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  useEffect(() => {
+    async function fetchData() {
+      // On Android 10+ request ACTIVITY_RECOGNITION first
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          console.warn('Activity recognition permission denied');
+          return;
+        }
+      }
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+      const options = {
+        scopes: [
+          Scopes.FITNESS_ACTIVITY_READ,
+          Scopes.FITNESS_HEART_RATE_READ,
+        ],
+      };
+
+      GoogleFit.authorize(options)
+        .then(authResult => {
+          console.log('🔍 FULL AUTH RESULT:', authResult);
+          if (authResult.success) {
+            const end = new Date();
+            const start = new Date();
+            start.setDate(end.getDate() - 7);
+
+            GoogleFit.getHeartRateSamples({
+              startDate: start.toISOString(),
+              endDate: end.toISOString(),
+            })
+              .then(samples => {
+                const formatted = (samples as Array<{ value: number; startDate: string }>).map(s => ({
+                  x: new Date(s.startDate).toLocaleDateString('en-US', { weekday: 'short' }),
+                  y: s.value as number,
+                }));
+                setHrData(formatted);
+              })
+              .catch(err => console.error('HR fetch error', err));
+          } else {
+            console.warn('Auth denied:', authResult);
+          }
+        })
+        .catch(err => console.error('Auth error:', err));
+    }
+
+    fetchData();
+  }, []);
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Your Metrics</Text>
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Resting Heart Rate (7d)</Text>
+        <VictoryChart
+          theme={VictoryTheme.material}
+          width={Dimensions.get('window').width - 32}
+          height={200}
+        >
+          <VictoryAxis style={{ tickLabels: { fontSize: 10 } }} />
+          <VictoryAxis dependentAxis style={{ tickLabels: { fontSize: 10 } }} />
+          <VictoryLine
+            data={hrData.length ? hrData : mockHRData}
+            interpolation="monotoneX"
+            style={{ data: { strokeWidth: 2 } }}
+          />
+        </VictoryChart>
+      </View>
+      {/* …other cards */}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: { padding: 16 },
+  header: { fontSize: 24, fontWeight: '600', marginBottom: 16 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  cardTitle: { fontSize: 16, fontWeight: '500', marginBottom: 8 },
 });
 
-export default App;
+export default TrackScreen;

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "292453082431",
+    "project_id": "mythealthmetrics",
+    "storage_bucket": "mythealthmetrics.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292453082431:android:64a6a10c5f98fc20809f8a",
+        "android_client_info": {
+          "package_name": "com.mytmetricsapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXqeMJVs8NjyRVCBhcKFxatFLnYFWIKE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
