@@ -7,12 +7,21 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:292453082431:android:64a6a10c5f98fc20809f8a",
+        "mobilesdk_app_id": "1:292453082431:android:18656770cd99096f809f8a",
         "android_client_info": {
           "package_name": "com.mytmetricsapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "292453082431-8307tm8ar2uh2k6fdaga00b136vs7bvq.apps.googleusercontent.com",
+          "client_type": 3,
+          "android_info": {
+            "package_name": "com.mytmetricsapp",
+            "certificate_hash": "39ebdc41ad4bd227137a8224afb46c11eecdb771"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAXqeMJVs8NjyRVCBhcKFxatFLnYFWIKE4"
